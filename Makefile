@@ -1,4 +1,4 @@
-BUILD_DIR:=bin
+BUILD_DIR:=.
 
 default: build
 
@@ -7,8 +7,8 @@ build: build/controller build/registry
 
 .PHONY: build/controller
 build/controller:
-	go build -o $(BUILD_DIR)/controller cmd/controller/main.go
+	go build -o $(BUILD_DIR)/morty-controller cmd/controller/main.go
 
 .PHONY: build/registry
 build/registry:
-	go build -o $(BUILD_DIR)/registry cmd/registry/main.go
+	go build -o $(BUILD_DIR)/morty-registry cmd/registry/main.go
