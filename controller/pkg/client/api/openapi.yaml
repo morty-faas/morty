@@ -1,0 +1,116 @@
+openapi: 3.0.0
+info:
+  description: |
+    This document contains the specification of the public-facing Morty APIs. For function invocation, please see the project README here: https://github.com/morty-faas/morty/controller#readme
+  title: Morty APIs
+  version: 0.1.1
+servers:
+  - url: /
+paths:
+  /functions:
+    get:
+      description: Get a list of the available functions
+      operationId: getFunctions
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetFunctionResponse'
+          description: The list of the available functions
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: An internal server error occured. Check the logs for more details
+      summary: Get a list of the available functions
+      tags:
+        - Function
+    post:
+      description: Create a new function in the system to be able to invoke it later.
+      operationId: createFunction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFunctionRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateFunctionResponse'
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request body is invalid
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: A function already exists with the same name
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: An internal server error occured. Check the logs for more details
+      summary: Create a new function
+      tags:
+        - Function
+components:
+  schemas:
+    GetFunctionResponse:
+      items:
+        $ref: '#/components/schemas/Function'
+      type: array
+    CreateFunctionRequest:
+      example:
+        image: image
+        name: name
+      properties:
+        name:
+          type: string
+        image:
+          type: string
+      type: object
+    CreateFunctionResponse:
+      $ref: '#/components/schemas/Function'
+    UUID:
+      description: The identifier of the resource
+      example: b53b71e0-2633-4a15-8435-8e6c56f66b9d
+      type: string
+    Function:
+      example:
+        image: image
+        name: weatho
+        id: b53b71e0-2633-4a15-8435-8e6c56f66b9d
+      properties:
+        id:
+          description: The identifier of the resource
+          example: b53b71e0-2633-4a15-8435-8e6c56f66b9d
+          type: string
+        name:
+          description: A unique name to your function
+          example: weatho
+          type: string
+        image:
+          description: The URL of the function image
+          type: string
+      required:
+        - image
+        - name
+      type: object
+    Error:
+      properties:
+        message:
+          description: Descriptive message of your error
+          example: Some error message
+          type: string
+      type: object

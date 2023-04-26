@@ -1,0 +1,45 @@
+name: Morty
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build ${{ matrix.cmd }}
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        cmd: ["controller", "registry"]
+    steps:
+      - id: go-cache-paths
+        run: echo "go-mod=$(go env GOMODCACHE)" >> $GITHUB_OUTPUT
+
+      - uses: actions/checkout@v3
+
+      - id: go-version
+        run: echo "version=$(cat ./.go-version)" >> $GITHUB_OUTPUT
+
+      - name: Set up cache for Go modules
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.go-cache-paths.outputs.go-mod }}
+          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
+
+      - name: Install Go ${{ steps.go-version.outputs.version }}
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ steps.go-version.outputs.version }}
+
+      - name: Build ${{ matrix.cmd }}
+        run: make build/${{ matrix.cmd }}
+
+  release-drafter:
+    needs: build
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Release drafter
+        uses: release-drafter/release-drafter@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
