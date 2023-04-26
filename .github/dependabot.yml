@@ -1,0 +1,10 @@
+version: 2
+updates:
+  - package-ecosystem: "gomod"
+    directory: "/"
+    open-pull-requests-limit: 5
+    rebase-strategy: auto
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore:"
