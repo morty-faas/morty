@@ -1,0 +1,28 @@
+name: Release
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  release:
+    strategy:
+      matrix:
+        cmd: ["controller", "registry"]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - id: go-version
+        run: echo "version=$(cat ./.go-version)" >> $GITHUB_OUTPUT
+
+      - name: Build and release ${{ matrix.cmd }}
+        uses: wangyoucao577/go-release-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          goos: linux
+          goarch: amd64
+          goversion: ${{ steps.go-version.outputs.version }}
+          binary_name: ${{ matrix.cmd }}
+          build_command: make build/${{ matrix.cmd }}

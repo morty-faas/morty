@@ -1,0 +1,108 @@
+openapi: 3.0.0
+info:
+  title: Morty APIs
+  description: |
+    This document contains the specification of the public-facing Morty APIs. For function invocation, please see the project README here: https://github.com/morty-faas/morty/controller#readme
+  version: 0.1.1
+paths:
+  /functions:
+    get:
+      tags: [Function]
+      operationId: getFunctions
+      summary: Get a list of the available functions
+      description: Get a list of the available functions
+      responses:
+        200:
+          description: The list of the available functions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetFunctionResponse'
+        500:
+          description: An internal server error occured. Check the logs for more details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags: [Function]
+      operationId: createFunction
+      summary: Create a new function
+      description: Create a new function in the system to be able to invoke it later.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFunctionRequest'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateFunctionResponse'
+        400:
+          description: The request body is invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        409:
+          description: A function already exists with the same name
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: An internal server error occured. Check the logs for more details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    GetFunctionResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/Function'
+
+    CreateFunctionRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        image:
+          type: string
+
+    CreateFunctionResponse:
+      $ref: '#/components/schemas/Function'
+
+    UUID:
+      type: string
+      example: 'b53b71e0-2633-4a15-8435-8e6c56f66b9d'
+      description: The identifier of the resource
+
+    Function:
+      type: object
+      required:
+        - 'name'
+        - 'image'
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        name:
+          description: A unique name to your function
+          example: weatho
+          type: string
+        image:
+          description: The URL of the function image
+          type: string
+
+    Error:
+      type: object
+      properties:
+        message:
+          example: Some error message
+          description: Descriptive message of your error
+          type: string

@@ -1,0 +1,79 @@
+openapi: 3.0.3
+info:
+  description: This document aims to provide a simple and clear Morty Function Registry
+    endpoints documentation.
+  title: Morty Registry - API Documentation
+  version: 1.0.0
+externalDocs:
+  description: Morty Function Registry on Github.
+  url: https://github.com/morty-faas/registry
+servers:
+- url: /
+tags:
+- description: Functions API endpoints
+  name: Functions
+paths:
+  /v1/functions/build:
+    post:
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BuildRequest'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuildResponse'
+          description: The function build was successful.
+      summary: Build a function and push the image into the registry.
+      tags:
+      - Functions
+  /v1/functions/{id}:
+    get:
+      parameters:
+      - description: The identifier of the function to upload.
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DownloadLinkResponse'
+          description: OK
+        "500":
+          description: An internal server error ocurred. Please check the logs of
+            your registry for more details.
+      summary: Get a download link for the image of the given function
+      tags:
+      - Functions
+components:
+  schemas:
+    BuildRequest:
+      properties:
+        runtime:
+          description: The name of the runtime to use.
+          example: python-3
+          type: string
+        name:
+          description: The name of the function.
+          example: my-python-func
+          type: string
+        archive:
+          format: binary
+          type: string
+      type: object
+    BuildResponse:
+      description: The URI to call on this server to retrieve a download link for
+        this function image.
+      type: string
+    DownloadLinkResponse:
+      description: A presigned URL to download the function image
+      type: string

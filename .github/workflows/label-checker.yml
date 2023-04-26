@@ -1,0 +1,33 @@
+name: Label Checker
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
+      - unlabeled
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  check_semantic_release_label:
+    name: Check for semantic version label
+    runs-on: ubuntu-latest
+    steps:
+      - uses: docker://agilepathway/pull-request-label-checker:latest
+        with:
+          one_of: major,minor,patch,skip-changelog
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+
+  check_labels:
+    name: Check labels
+    runs-on: ubuntu-latest
+    steps:
+      - uses: docker://agilepathway/pull-request-label-checker:latest
+        with:
+          any_of: documentation,enhancement,feature,fix,chore,dependencies
+          none_of: invalid,wontfix,duplicate,question,bug
+          repo_token: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  redis:
+    container_name: morty.redis
+    image: redis:7.0.10-bullseye
+    restart: always
+    ports:
+      - 6379:6379
+    command: redis-server --save 20 1 --loglevel warning
+    volumes:
+      - redis-data:/data
+  
+  minio:
+    image: minio/minio
+    container_name: morty.minio
+    restart: "unless-stopped"
+    volumes:
+        - minio-data:/data
+    environment:
+        MINIO_ROOT_USER: mortymorty
+        MINIO_ROOT_PASSWORD: mortymorty
+    command: server --address 0.0.0.0:9000 --console-address ":9001" /data
+    ports:
+        - "9000:9000"
+        - "9001:9001"
+    healthcheck:
+        test: curl -f "http://localhost:9000/minio/health/live
+        interval: 30s
+        timeout: 20s
+        retries: 3
+
+volumes:
+  redis-data:
+  minio-data:
+
