@@ -1,43 +1,59 @@
 name-template: "v$RESOLVED_VERSION"
 tag-template: "v$RESOLVED_VERSION"
-template: |
-  ## What's changed
-  $CHANGES
-  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
-categories:
-  - title: Features
-    labels:
-      - "type: feat"
-  - title: Fixes
-    labels:
-      - "type: fix"
-  - title: Documentation
-    labels:
-      - "type: docs"
-  - title: CI
-    labels:
-      - "type: ci"
-  - title: Dependency Updates
-    labels:
-      - "type: build"
-  - title: Refactor
-    labels:
-      - "type: refactor"
-    collapse-after: 5
 
 change-template: "- $TITLE @$AUTHOR (#$NUMBER)"
 change-title-escapes: '\<*_&'
+
+categories:
+  - title: 'Features'
+    label: 'type/enhancement'
+  - title: 'Bug fixes'
+    label: 'type/bug'
+  - title: 'Documentation'
+    label: 'type/documentation'
+  - title: 'Dependencies'
+    collapse-after: 3
+    label: 'dependencies'
+
 version-resolver:
+  default: minor
   major:
     labels:
       - major
   minor:
     labels:
-      - minor
+      - type/enhancement
   patch:
     labels:
-      - patch
-  default: patch
+      - type/bug
+      - type/documentation
+      - dependencies
+
+autolabeler:
+  - label: 'type/bug'
+    title:
+      - '/fix.*/'
+  - label: 'type/enhancement'
+    title:
+      - '/feat.*/'
+      - '/fix.*/'
+      - '/ci.*/'
+      - '/chore.*/'
+  - label: 'type/documentation'
+    files:
+      - '*.md'
+    title:
+      - '/docs.*/'
+  - label: 'dependencies'
+    title: 
+      - '/chore\(update\).*/'
 
 exclude-labels:
   - skip-changelog
+
+template: |
+  ## What's changed
+  
+  $CHANGES
+  
+  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
