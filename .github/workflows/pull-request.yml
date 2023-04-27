@@ -6,6 +6,42 @@ on:
       - main
 
 jobs:
+  gofmt:
+    name: Format
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - id: go-version
+        run: echo "version=$(cat ./.go-version)" >> $GITHUB_OUTPUT
+      
+      - name: Install Go ${{ steps.go-version.outputs.version }}
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ steps.go-version.outputs.version }}
+
+      - uses: Jerome1337/gofmt-action@v1.0.5
+        with:
+          gofmt-path: '.'
+          gofmt-flags: '-l -d'
+
+  golangci:
+    name: Lint
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - id: go-version
+        run: echo "version=$(cat ./.go-version)" >> $GITHUB_OUTPUT
+      
+      - name: Install Go ${{ steps.go-version.outputs.version }}
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ steps.go-version.outputs.version }}
+      
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+
   build:
     name: Build ${{ matrix.cmd }}
     runs-on: ubuntu-22.04
