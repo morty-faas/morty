@@ -107,7 +107,7 @@ func (s *server) getInitialState() {
 	ctx := context.Background()
 	if functions, err := s.orch.GetFunctions(ctx); err == nil {
 		// If functions are found, we need to populate the state with them
-		if errs := s.state.SetMultiple(ctx, functions); errs != nil && len(errs) > 0 {
+		if errs := s.state.SetMultiple(ctx, functions); len(errs) > 0 {
 			logrus.Warnf("Failed to populate state with existing functions: %v", err)
 		}
 	} else {

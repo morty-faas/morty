@@ -26,13 +26,18 @@ func Unzip(src, dst string) error {
 
 		name := path.Join(dst, file.Name)
 
-		os.MkdirAll(path.Dir(name), 0755)
+		if err := os.MkdirAll(path.Dir(name), 0755); err != nil {
+			return err
+		}
+
 		create, err := os.Create(name)
 		if err != nil {
 			return err
 		}
 
-		create.ReadFrom(open)
+		if _, err := create.ReadFrom(open); err != nil {
+			return err
+		}
 		create.Close()
 	}
 	return nil

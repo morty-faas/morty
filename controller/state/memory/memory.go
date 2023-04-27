@@ -41,10 +41,13 @@ func (a *adapter) Set(ctx context.Context, fn *types.Function) error {
 }
 
 func (a *adapter) SetMultiple(ctx context.Context, functions []*types.Function) []error {
+	var errors []error
 	for _, fn := range functions {
-		a.Set(ctx, fn)
+		if err := a.Set(ctx, fn); err != nil {
+			errors = append(errors, err)
+		}
 	}
-	return nil
+	return errors
 }
 
 func (a *adapter) SetWithExpiry(ctx context.Context, key string, expiry time.Duration) error {
