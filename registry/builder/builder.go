@@ -312,7 +312,7 @@ func streamDockerLogs(buildId string, r io.Reader) {
 		line = sc.Text()
 
 		l := &buildLog{}
-		json.Unmarshal([]byte(line), l)
+		_ = json.Unmarshal([]byte(line), l)
 
 		if l.Message == "" || l.Message == "\n" {
 			continue

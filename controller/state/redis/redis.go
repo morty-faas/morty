@@ -40,7 +40,7 @@ func NewState(cfg *Config, expiryCallback state.FnExpiryCallback) (state.State, 
 	// this is telling redis to subscribe to events published in the keyevent channel, specifically for expired events
 	pubsub := client.PSubscribe(context.Background(), "__keyevent@0__:expired")
 
-	go func(redis.PubSub) {
+	go func(*redis.PubSub) {
 		for {
 			message, err := pubsub.ReceiveMessage(context.Background())
 			if err != nil {
@@ -50,7 +50,7 @@ func NewState(cfg *Config, expiryCallback state.FnExpiryCallback) (state.State, 
 			log.Tracef("Key %s has expired", message.Payload)
 			expiryCallback(message.Payload)
 		}
-	}(*pubsub)
+	}(pubsub)
 
 	log.Info("State engine 'redis' successfully initialized")
 	return &adapter{client}, nil

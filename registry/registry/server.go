@@ -118,7 +118,7 @@ func (s *Server) router() http.Handler {
 func (s *Server) JSONResponse(w http.ResponseWriter, status int, data any) {
 	w.WriteHeader(status)
 	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(data)
+	_ = json.NewEncoder(w).Encode(data)
 }
 
 func (s *Server) APIErrorResponse(w http.ResponseWriter, err *APIError) {
