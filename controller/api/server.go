@@ -33,9 +33,9 @@ func New(cfg *config.Config) (*server, error) {
 		return nil, err
 	}
 
-	state, err := cfg.StateFactory(func(functionName string) {
-		if err := orch.DeleteFunctionInstance(context.Background(), &types.Function{Name: functionName}); err != nil {
-			log.Errorf("Failed to automatically delete instance for function %s: %v", functionName, err)
+	state, err := cfg.StateFactory(func(instance string) {
+		if err := orch.DeleteFunctionInstance(context.Background(), &types.FnInstance{Id: instance}); err != nil {
+			log.Errorf("Failed to automatically delete instance %s: %v", instance, err)
 		}
 	})
 	if err != nil {

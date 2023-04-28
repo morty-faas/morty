@@ -158,9 +158,9 @@ func (a *adapter) createWorkloadInstance(ctx context.Context, workloadId, name s
 	return nil
 }
 
-func (a *adapter) DeleteFunctionInstance(ctx context.Context, fn *types.Function) error {
+func (a *adapter) DeleteFunctionInstance(ctx context.Context, fn *types.FnInstance) error {
 	input := rik.DeleteInstanceRequest{
-		Id: &fn.Name,
+		Id: &fn.Id,
 	}
 
 	_, err := a.client.InstancesApi.DeleteInstance(ctx).DeleteInstanceRequest(input).Execute()

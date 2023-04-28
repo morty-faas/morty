@@ -17,5 +17,5 @@ type Orchestrator interface {
 	GetFunctionInstance(ctx context.Context, fn *types.Function) (*types.FnInstance, bool, error)
 
 	// DeleteFunctionInstance delete a function instance.
-	DeleteFunctionInstance(ctx context.Context, fn *types.Function) error
+	DeleteFunctionInstance(ctx context.Context, fn *types.FnInstance) error
 }
