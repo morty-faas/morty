@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/morty-faas/morty/controller/orchestration"
 	"github.com/morty-faas/morty/controller/state"
+	"github.com/morty-faas/morty/controller/telemetry"
 	"github.com/morty-faas/morty/controller/types"
 	log "github.com/sirupsen/logrus"
 )
@@ -24,6 +25,7 @@ var (
 
 func InvokeFunctionHandler(s state.State, orch orchestration.Orchestrator) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		start := time.Now()
 		ctx, fnName := c.Request.Context(), c.Param("name")
 
 		log.Debugf("Invoke function '%s'", fnName)
@@ -40,14 +42,14 @@ func InvokeFunctionHandler(s state.State, orch orchestration.Orchestrator) gin.H
 			return
 		}
 
-		instance, err := orch.GetFunctionInstance(ctx, fn)
+		instance, isColdStart, err := orch.GetFunctionInstance(ctx, fn)
 		if err != nil {
 			log.Error(err)
 			c.JSON(http.StatusInternalServerError, makeApiError(err))
 			return
 		}
 
-		proxy := makeProxy(instance)
+		proxy := httputil.NewSingleHostReverseProxy(instance.Endpoint)
 
 		// Healthcheck the instance
 		// Perform healthcheck against the Alpha agent
@@ -77,48 +79,49 @@ func InvokeFunctionHandler(s state.State, orch orchestration.Orchestrator) gin.H
 			return
 		}
 
-		proxy.ServeHTTP(c.Writer, c.Request)
-	}
-}
+		// Increment the number of invocations for this function
+		labels := []string{fnName, strconv.FormatBool(isColdStart)}
+		telemetry.FunctionInvocationCounter.WithLabelValues(labels...).Inc()
 
-func makeProxy(instance *types.FnInstance) *httputil.ReverseProxy {
-	proxy := httputil.NewSingleHostReverseProxy(instance.Endpoint)
+		proxy.ModifyResponse = func(r *http.Response) error {
+			// Record the execution time of the invocation
+			elapsed := time.Since(start).Seconds()
+			log.Debugf("Function '%s' was invoked in %vs (is cold start: %v)", fnName, elapsed, isColdStart)
+			telemetry.FunctionInvocationDurationHistogram.WithLabelValues(labels...).Observe(elapsed)
 
-	// Modify the response the response so we can extract
-	// the payload from the Alpha response and return it to the caller
-	proxy.ModifyResponse = func(r *http.Response) error {
-		fnResponse := &types.FnInvocationResponse{}
-		by, err := io.ReadAll(r.Body)
-		if err != nil {
-			log.Errorf("Could not read response body: %v", err)
-			return err
-		}
-		defer r.Body.Close()
-
-		if err := json.Unmarshal(by, &fnResponse); err != nil {
-			log.Errorf("Could not unmarshal function response: %v", err)
-			return err
-		}
-
-		var responseBytes []byte
-		// if the function payload is a string, return it as text
-		if value, ok := fnResponse.Payload.(string); ok {
-			responseBytes = []byte(value)
-		} else {
-			responseBytes, err = json.Marshal(fnResponse.Payload)
+			fnResponse := &types.FnInvocationResponse{}
+			by, err := io.ReadAll(r.Body)
 			if err != nil {
+				log.Errorf("Could not read response body: %v", err)
 				return err
 			}
+			defer r.Body.Close()
+
+			if err := json.Unmarshal(by, &fnResponse); err != nil {
+				log.Errorf("Could not unmarshal function response: %v", err)
+				return err
+			}
+
+			var responseBytes []byte
+			// if the function payload is a string, return it as text
+			if value, ok := fnResponse.Payload.(string); ok {
+				responseBytes = []byte(value)
+			} else {
+				responseBytes, err = json.Marshal(fnResponse.Payload)
+				if err != nil {
+					return err
+				}
+			}
+
+			contentLength := len(responseBytes)
+
+			r.Body = io.NopCloser(bytes.NewReader(responseBytes))
+			r.ContentLength = int64(contentLength)
+			r.Header.Set("Content-Length", strconv.Itoa(contentLength))
+
+			return nil
 		}
 
-		contentLength := len(responseBytes)
-
-		r.Body = io.NopCloser(bytes.NewReader(responseBytes))
-		r.ContentLength = int64(contentLength)
-		r.Header.Set("Content-Length", strconv.Itoa(contentLength))
-
-		return nil
+		proxy.ServeHTTP(c.Writer, c.Request)
 	}
-
-	return proxy
 }
