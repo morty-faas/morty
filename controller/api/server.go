@@ -14,6 +14,7 @@ import (
 	"github.com/morty-faas/morty/controller/orchestration"
 	"github.com/morty-faas/morty/controller/state"
 	"github.com/morty-faas/morty/controller/types"
+	"github.com/morty-faas/morty/pkg/telemetry"
 	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 )
@@ -67,6 +68,16 @@ func (s *server) ListenAndServe() {
 		}
 	}()
 
+	metricsAddr := fmt.Sprintf(":%d", s.cfg.MetricsPort)
+	metricsSrv := telemetry.NewMetricsServer(metricsAddr)
+
+	go func() {
+		logrus.Infof("Metrics server listening on %s", metricsAddr)
+		if err := metricsSrv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			logrus.Fatalf("Could not start Metrics HTTP server: %v", err)
+		}
+	}()
+
 	// Wait for an interrupt signal
 	<-ctx.Done()
 
@@ -78,6 +89,11 @@ func (s *server) ListenAndServe() {
 	// the request it is currently handling
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+
+	if err := metricsSrv.Shutdown(ctx); err != nil {
+		log.Fatalf("Metrics server forced to shutdown: %v", err)
+	}
+
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatalf("HTTP server forced to shutdown: %v", err)
 	}

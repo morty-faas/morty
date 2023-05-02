@@ -75,26 +75,30 @@ func (a *adapter) CreateFunction(ctx context.Context, fn *types.Function) (*type
 	return fn, nil
 }
 
-func (a *adapter) GetFunctionInstance(ctx context.Context, fn *types.Function) (*types.FnInstance, error) {
+func (a *adapter) GetFunctionInstance(ctx context.Context, fn *types.Function) (*types.FnInstance, bool, error) {
+	// isColdStart used to control wether it is a cold start or not for the instance
+	isColdStart := false
+
 	instances, err := a.getWorkloadInstances(ctx, fn.Id)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	if len(instances) == 0 {
 		log.Debugf("Deploying new instance for function: %+v", fn)
+		isColdStart = true
 
 		if err := a.createWorkloadInstance(ctx, fn.Id, fn.Name); err != nil {
 			err := fmt.Errorf("Failed to create instance: %v", err)
 			log.Error(err)
-			return nil, err
+			return nil, false, err
 		}
 
 		time.Sleep(500 * time.Millisecond)
 
 		instances, err = a.getWorkloadInstances(ctx, fn.Id)
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 	}
 
@@ -111,7 +115,7 @@ func (a *adapter) GetFunctionInstance(ctx context.Context, fn *types.Function) (
 		Endpoint: url,
 	}
 
-	return instance, nil
+	return instance, isColdStart, nil
 }
 
 // getWorkloads is a helper function to retrieve all the workloads from the RIK cluster

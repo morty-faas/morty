@@ -14,7 +14,7 @@ type Orchestrator interface {
 	CreateFunction(ctx context.Context, fn *types.Function) (*types.Function, error)
 
 	// GetFunctionInstance retrieve an instance of the function, that must be ready to receive requests.
-	GetFunctionInstance(ctx context.Context, fn *types.Function) (*types.FnInstance, error)
+	GetFunctionInstance(ctx context.Context, fn *types.Function) (*types.FnInstance, bool, error)
 
 	// DeleteFunctionInstance delete a function instance.
 	DeleteFunctionInstance(ctx context.Context, fn *types.Function) error

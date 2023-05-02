@@ -13,6 +13,7 @@ import (
 type (
 	Config struct {
 		Port         int          `yaml:"port"`
+		MetricsPort  int          `yaml:"metricsPort"`
 		Orchestrator Orchestrator `yaml:"orchestrator"`
 		State        State        `yaml:"state"`
 	}
@@ -39,7 +40,8 @@ var loaderOptions = &config.Options[Config]{
 
 	// Default configuration
 	Default: &Config{
-		Port: 8080,
+		Port:        8080,
+		MetricsPort: 9090,
 		Orchestrator: Orchestrator{
 			Rik: rik.Config{
 				Cluster: "http://localhost:5000",
