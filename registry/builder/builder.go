@@ -41,10 +41,9 @@ type (
 )
 
 const (
-	destination     = "/tmp/morty-runtimes"
-	runtimeEndpoint = "github.com/morty-faas/runtimes.git"
-	branch          = "main"
-	alphaInitScript = `#!/bin/sh
+	runtimesDirectory   = "/tmp/morty-runtimes"
+	baseRuntimeEndpoint = "github.com/morty-faas/runtimes.git//template"
+	alphaInitScript     = `#!/bin/sh
 source /app/env.sh
 /usr/bin/alpha
 	`
@@ -65,23 +64,23 @@ var (
 func NewBuilder() (*Builder, error) {
 	log.Info("bootstrapping new function builder")
 
-	dir, err := downloadRuntimes()
-	if err != nil {
-		return nil, err
-	}
-
 	// Initialize the docker client for future requests
 	client, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		return nil, helpers.WrapError(ErrFailedToInitializeDockerClient, err)
 	}
 
-	return &Builder{client, dir}, nil
+	return &Builder{client, runtimesDirectory}, nil
 }
 
 // ImageBuild package an entire function image, and return the path to the image on disk.
 func (b *Builder) ImageBuild(ctx context.Context, opts *BuildOptions) (string, error) {
 	buildId := opts.Id
+
+	err := downloadRuntime(opts.Runtime)
+	if err != nil {
+		return "", err
+	}
 
 	log.Infof("build/%s: starting new build", buildId)
 
@@ -276,24 +275,28 @@ func makeExt4FS(workingDirectory string, size int64) (string, string, error) {
 	return ext4, mountpoint, nil
 }
 
-// downloadRuntimes will clone the runtime repository to the local disk.
-// It will be executed only once during the initialization of the builder.
-func downloadRuntimes() (string, error) {
-	log.Infof("downloading runtimes from %s into %s", runtimeEndpoint, destination)
+// downloadRuntime(runtime string) will download the specific runtime code base to the local disk.
+// It will be executed each time a build will be triggered.
+func downloadRuntime(runtime string) error {
+	log.Infof("downloading %s runtime from %s into %s", runtime, baseRuntimeEndpoint, runtimesDirectory)
 
-	if _, err := os.Stat(destination); !os.IsNotExist(err) {
-		log.Debugf("trying to remove %s as it is not empty", destination)
+	if _, err := os.Stat(runtimesDirectory); !os.IsNotExist(err) {
+		log.Debugf("trying to remove %s as it is not empty", runtimesDirectory)
 
-		if err := os.RemoveAll(destination); err != nil {
-			return "", err
+		if err := os.RemoveAll(runtimesDirectory); err != nil {
+			return err
 		}
 	}
 
-	if err := getter.Get(destination, runtimeEndpoint); err != nil {
-		return "", helpers.WrapError(ErrFailedToDownloadRuntimes, err)
+	runtimeEndpoint := path.Join(baseRuntimeEndpoint, runtime)
+
+	runtimeDestination := path.Join(runtimesDirectory, runtime)
+
+	if err := getter.Get(runtimeDestination, runtimeEndpoint); err != nil {
+		return helpers.WrapError(ErrFailedToDownloadRuntimes, err)
 	}
 
-	return path.Join(destination, "template"), nil
+	return nil
 }
 
 // streamDockerLogs is a little helper function that help to stream the docker engine
