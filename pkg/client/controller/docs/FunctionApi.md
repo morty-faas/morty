@@ -30,7 +30,7 @@ import (
 )
 
 func main() {
-    createFunctionRequest := *openapiclient.NewCreateFunctionRequest() // CreateFunctionRequest | 
+    createFunctionRequest := *openapiclient.NewCreateFunctionRequest("Name_example", "Version_example", "Image_example") // CreateFunctionRequest | 
 
     configuration := openapiclient.NewConfiguration()
     apiClient := openapiclient.NewAPIClient(configuration)
@@ -77,7 +77,7 @@ No authorization required
 
 ## GetFunctions
 
-> []Function GetFunctions(ctx).Execute()
+> []GetFunctionResponseInner GetFunctions(ctx).Execute()
 
 Get a list of the available functions
 
@@ -104,7 +104,7 @@ func main() {
         fmt.Fprintf(os.Stderr, "Error when calling `FunctionApi.GetFunctions``: %v\n", err)
         fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
     }
-    // response from `GetFunctions`: []Function
+    // response from `GetFunctions`: []GetFunctionResponseInner
     fmt.Fprintf(os.Stdout, "Response from `FunctionApi.GetFunctions`: %v\n", resp)
 }
 ```
@@ -120,7 +120,7 @@ Other parameters are passed through a pointer to a apiGetFunctionsRequest struct
 
 ### Return type
 
-[**[]Function**](Function.md)
+[**[]GetFunctionResponseInner**](GetFunctionResponseInner.md)
 
 ### Authorization
 

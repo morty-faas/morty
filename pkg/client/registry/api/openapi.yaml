@@ -3,7 +3,7 @@ info:
   description: This document aims to provide a simple and clear Morty Function Registry
     endpoints documentation.
   title: Morty Registry - API Documentation
-  version: 1.0.0
+  version: 1.1.0
 externalDocs:
   description: Morty Function Registry on Github.
   url: https://github.com/morty-faas/registry
@@ -23,17 +23,17 @@ paths:
       responses:
         "200":
           content:
-            application/json:
+            application/text:
               schema:
                 $ref: '#/components/schemas/BuildResponse'
           description: The function build was successful.
       summary: Build a function and push the image into the registry.
       tags:
       - Functions
-  /v1/functions/{id}:
+  /v1/functions/{id}/{version}:
     get:
       parameters:
-      - description: The identifier of the function to upload.
+      - description: The identifier of the function to download.
         explode: false
         in: path
         name: id
@@ -41,13 +41,18 @@ paths:
         schema:
           type: string
         style: simple
+      - description: The version of the function to download.
+        explode: false
+        in: path
+        name: version
+        required: true
+        schema:
+          type: string
+        style: simple
       responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DownloadLinkResponse'
-          description: OK
+        "302":
+          description: Redirection on a pre-signed URL allowing the caller to download
+            the function image.
         "500":
           description: An internal server error ocurred. Please check the logs of
             your registry for more details.
@@ -66,6 +71,9 @@ components:
           description: The name of the function.
           example: my-python-func
           type: string
+        version:
+          description: The version of the function. This should be a semantic version.
+          type: string
         archive:
           format: binary
           type: string
@@ -73,7 +81,4 @@ components:
     BuildResponse:
       description: The URI to call on this server to retrieve a download link for
         this function image.
-      type: string
-    DownloadLinkResponse:
-      description: A presigned URL to download the function image
       type: string
