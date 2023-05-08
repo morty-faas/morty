@@ -9,11 +9,7 @@ import (
 func (s *Server) GetImageHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	id := chi.URLParam(r, "id")
-	if id == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
+	id := chi.URLParam(r, "id") + "-" + chi.URLParam(r, "version")
 
 	_, link, err := s.storage.GetDownloadLink(id)
 	if err != nil {

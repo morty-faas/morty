@@ -3,7 +3,7 @@ info:
   title: Morty Registry - API Documentation
   description: |-
     This document aims to provide a simple and clear Morty Function Registry endpoints documentation.
-  version: 1.0.0
+  version: 1.1.0
 externalDocs:
   description: Morty Function Registry on Github.
   url: https://github.com/morty-faas/registry
@@ -20,20 +20,26 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/BuildRequest'
+              $ref: "#/components/schemas/BuildRequest"
       responses:
-        '200':
+        "200":
           description: The function build was successful.
           content:
-            application/json:
+            application/text:
               schema:
-                $ref: '#/components/schemas/BuildResponse'
-  /v1/functions/{id}:
+                $ref: "#/components/schemas/BuildResponse"
+  /v1/functions/{id}/{version}:
     get:
       parameters:
         - name: id
           in: path
-          description: The identifier of the function to upload.
+          description: The identifier of the function to download.
+          required: true
+          schema:
+            type: string
+        - name: version
+          in: path
+          description: The version of the function to download.
           required: true
           schema:
             type: string
@@ -41,14 +47,9 @@ paths:
         - Functions
       summary: Get a download link for the image of the given function
       responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DownloadLinkResponse'
-
-        '500':
+        "302":
+          description: Redirection on a pre-signed URL allowing the caller to download the function image.
+        "500":
           description: An internal server error ocurred. Please check the logs of your registry for more details.
 components:
   schemas:
@@ -63,12 +64,12 @@ components:
           type: string
           description: The name of the function.
           example: my-python-func
+        version:
+          type: string
+          description: The version of the function. This should be a semantic version.
         archive:
           type: string
           format: binary
     BuildResponse:
       type: string
       description: The URI to call on this server to retrieve a download link for this function image.
-    DownloadLinkResponse:
-      type: string
-      description: A presigned URL to download the function image
