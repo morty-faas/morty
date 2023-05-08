@@ -12,9 +12,8 @@ require (
 	github.com/hashicorp/go-getter v1.7.1
 	github.com/morty-faas/registry v1.1.0
 	github.com/otiai10/copy v1.11.0
-	github.com/pierrec/lz4 v2.6.1+incompatible
-	github.com/prometheus/client_golang v1.15.1
-	github.com/redis/go-redis/v9 v9.0.4
+	github.com/prometheus/client_golang v1.15.0
+	github.com/redis/go-redis/v9 v9.0.3
 	github.com/rik-org/rik-go-client v0.1.4
 	github.com/sirupsen/logrus v1.9.0
 	github.com/thomasgouveia/go-config v1.0.0
@@ -91,6 +90,7 @@ require (
 	github.com/opencontainers/image-spec v1.1.0-rc2.0.20221005185240-3a7f492d3f1b // indirect
 	github.com/opencontainers/runc v1.1.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
+	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.42.0 // indirect
