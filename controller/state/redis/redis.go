@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/morty-faas/morty/controller/state"
@@ -56,32 +57,55 @@ func NewState(cfg *Config, expiryCallback state.FnExpiryCallback) (state.State, 
 	return &adapter{client}, nil
 }
 
-func (a *adapter) Get(ctx context.Context, key string) (*types.Function, error) {
-	r := a.client.HGetAll(ctx, key)
-	log.Tracef("state/redis: %s", r.String())
+func (a *adapter) GetAll(ctx context.Context) ([]*types.Function, error) {
+	var functions []*types.Function
 
-	res, err := r.Result()
+	keys, err := a.client.Keys(ctx, "*:v*").Result()
 	if err != nil {
 		return nil, err
 	}
 
-	if len(res) == 0 {
-		return nil, nil
+	for _, key := range keys {
+		fn, err := a.getFunctionByKey(ctx, key)
+		if err != nil {
+			log.Warnf("state/redis: failed to get function at key '%s' : %v", key, err)
+		}
+		functions = append(functions, fn)
 	}
 
-	fn := &types.Function{
-		Id:       res["id"],
-		Name:     key,
-		ImageURL: res["imageUrl"],
+	return functions, nil
+}
+
+func (a *adapter) GetByVersion(ctx context.Context, key, version string) (*types.Function, error) {
+	log.Tracef("state/redis: retrieving value for key '%s' and version '%s'", key, version)
+	versions, err := a.getFunctionVersions(ctx, key)
+	if err != nil {
+		return nil, err
 	}
 
-	return fn, nil
+	if version == state.DefaultVersion {
+		version = versions[len(versions)-1]
+	}
+
+	return a.getFunctionByKey(ctx, key+":"+version)
+}
+
+func (a *adapter) Get(ctx context.Context, key string) (*types.Function, error) {
+	return a.GetByVersion(ctx, key, state.DefaultVersion)
 }
 
 func (a *adapter) Set(ctx context.Context, fn *types.Function) error {
-	r := a.client.HSet(ctx, fn.Name, fn)
+	r := a.client.HSet(ctx, fn.Id(), fn)
 	log.Tracef("state/redis: %s", r.String())
 	_, err := r.Result()
+	if err != nil {
+		return err
+	}
+
+	// Maintain the list of versions per function
+	r = a.client.RPush(ctx, fn.Name, fn.Version)
+	log.Tracef("state/redis: %s", r.String())
+	_, err = r.Result()
 	return err
 }
 
@@ -100,4 +124,33 @@ func (a *adapter) SetWithExpiry(ctx context.Context, key string, expiry time.Dur
 
 	_, err := a.client.Set(ctx, key, "", expiry).Result()
 	return err
+}
+
+func (a *adapter) getFunctionByKey(ctx context.Context, key string) (*types.Function, error) {
+	r := a.client.HGetAll(ctx, key)
+	log.Tracef("state/redis: %s", r.String())
+	res, err := r.Result()
+	if err != nil {
+		return nil, err
+	}
+
+	if len(res) == 0 {
+		return nil, nil
+	}
+
+	tokens := strings.Split(key, ":")
+	name, version := tokens[0], tokens[1]
+
+	fn := &types.Function{
+		Name:           name,
+		Version:        version,
+		OrchestratorId: res["orchestratorId"],
+		ImageURL:       res["imageUrl"],
+	}
+
+	return fn, nil
+}
+
+func (a *adapter) getFunctionVersions(ctx context.Context, key string) ([]string, error) {
+	return a.client.LRange(ctx, key, 0, -1).Result()
 }

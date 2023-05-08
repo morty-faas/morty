@@ -12,13 +12,19 @@ var (
 	ErrKeyNotFound = errors.New("key not found")
 )
 
+const DefaultVersion = "latest"
+
 type FnExpiryCallback func(string)
 
-// State is a generic interface for our controller state
+// State is a generic interface for our functions state
 type State interface {
-	// Get retrieve the value associated to the given key.
+	// GetAll retrieve all the functions from the state.
+	GetAll(ctx context.Context) ([]*types.Function, error)
+	// Get retrieve the latest version of the function associated to the given key.
 	// If the key doesn't exists, an error ErrKeyNotFound will be returned
 	Get(ctx context.Context, key string) (*types.Function, error)
+	// GetByVersion retrieve a function associated to the given version.
+	GetByVersion(ctx context.Context, key, version string) (*types.Function, error)
 	// Set a tuple of key/value in the state
 	Set(ctx context.Context, fn *types.Function) error
 	// SetMultiple set multiple keys in one call

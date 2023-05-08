@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -9,15 +10,17 @@ import (
 	"github.com/morty-faas/morty/controller/state"
 	"github.com/morty-faas/morty/controller/types"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/mod/semver"
 )
 
 type createFnRequest struct {
-	Name  string `json:"name"`
-	Image string `json:"image"`
+	Name    string `json:"name"`
+	Version string `json:"version"`
+	Image   string `json:"image"`
 }
 
 var (
-	ErrNameConflict = errors.New("a function already exists with the given name")
+	ErrVersionConflict = errors.New("version already exists for this function")
 )
 
 func CreateFunctionHandler(state state.State, orch orchestration.Orchestrator) gin.HandlerFunc {
@@ -32,19 +35,25 @@ func CreateFunctionHandler(state state.State, orch orchestration.Orchestrator) g
 			return
 		}
 
-		// We don't want to allow the user to create a function
-		// if a function already exists with the same name at the creation
-		if fn, _ := state.Get(ctx, data.Name); fn != nil {
-			logrus.Errorf("A function already exists with the name: %s", data.Name)
-			c.JSON(http.StatusConflict, makeApiError(ErrNameConflict))
-			return
+		if !semver.IsValid(data.Version) {
+			err := fmt.Errorf("Version '%s' isn't a valid semantic version", data.Version)
+			logrus.Error(err)
+			c.JSON(http.StatusBadRequest, makeApiError(err))
 		}
 
 		fn := &types.Function{
 			Name:     data.Name,
+			Version:  data.Version,
 			ImageURL: data.Image,
 		}
 
+		// Ensure that the version do not exists for this function
+		if fn, _ := state.GetByVersion(ctx, fn.Name, fn.Version); fn != nil {
+			c.JSON(http.StatusConflict, makeApiError(ErrVersionConflict))
+			return
+		}
+
+		// Process the function into the orchestrator
 		fn, err := orch.CreateFunction(ctx, fn)
 		if err != nil {
 			logrus.Errorf("Failed to create function into the orchestrator: %v", err)
