@@ -9,7 +9,6 @@ require (
 	github.com/docker/docker v23.0.6+incompatible
 	github.com/gin-gonic/gin v1.9.0
 	github.com/go-chi/chi/v5 v5.0.8
-	github.com/google/uuid v1.3.0
 	github.com/hashicorp/go-getter v1.7.1
 	github.com/morty-faas/registry v1.1.0
 	github.com/otiai10/copy v1.11.0
@@ -19,6 +18,7 @@ require (
 	github.com/rik-org/rik-go-client v0.1.4
 	github.com/sirupsen/logrus v1.9.0
 	github.com/thomasgouveia/go-config v1.0.0
+	golang.org/x/mod v0.10.0
 )
 
 require (
@@ -65,6 +65,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
 	github.com/googleapis/gax-go/v2 v2.7.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
@@ -107,7 +108,6 @@ require (
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/arch v0.2.0 // indirect
 	golang.org/x/crypto v0.6.0 // indirect
-	golang.org/x/mod v0.7.0 // indirect
 	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/oauth2 v0.5.0 // indirect
 	golang.org/x/sys v0.7.0 // indirect
