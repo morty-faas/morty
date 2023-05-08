@@ -3,7 +3,7 @@ info:
   description: |
     This document contains the specification of the public-facing Morty APIs. For function invocation, please see the project README here: https://github.com/morty-faas/morty/controller#readme
   title: Morty APIs
-  version: 0.1.1
+  version: 1.1.0
 servers:
 - url: /
 paths:
@@ -17,7 +17,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetFunctionResponse'
-          description: The list of the available functions
+          description: A list of the available function and the avalaible versions
+            for each of them.
         "500":
           content:
             application/json:
@@ -68,17 +69,24 @@ components:
   schemas:
     GetFunctionResponse:
       items:
-        $ref: '#/components/schemas/Function'
+        $ref: '#/components/schemas/GetFunctionResponse_inner'
       type: array
     CreateFunctionRequest:
       example:
         image: image
         name: name
+        version: version
       properties:
         name:
           type: string
+        version:
+          type: string
         image:
           type: string
+      required:
+      - image
+      - name
+      - version
       type: object
     CreateFunctionResponse:
       $ref: '#/components/schemas/Function'
@@ -113,4 +121,23 @@ components:
           description: Descriptive message of your error
           example: Some error message
           type: string
+      type: object
+    GetFunctionResponse_inner:
+      example:
+        versions:
+        - v1.0.0
+        - v1.1.0
+        - v2.0.0
+        name: name
+      properties:
+        name:
+          type: string
+        versions:
+          example:
+          - v1.0.0
+          - v1.1.0
+          - v2.0.0
+          items:
+            type: string
+          type: array
       type: object
