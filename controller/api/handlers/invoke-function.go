@@ -26,11 +26,11 @@ var (
 func InvokeFunctionHandler(s state.State, orch orchestration.Orchestrator) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
-		ctx, fnName := c.Request.Context(), c.Param("name")
+		ctx, fnName, fnVersion := c.Request.Context(), c.Param("name"), c.Param("version")
 
-		log.Debugf("Invoke function '%s'", fnName)
+		log.Debugf("Invoke version '%s' of function '%s'", fnVersion, fnName)
 
-		fn, err := s.Get(ctx, fnName)
+		fn, err := s.GetByVersion(ctx, fnName, fnVersion)
 		if err != nil {
 			log.Error(err)
 			c.JSON(http.StatusInternalServerError, makeApiError(err))

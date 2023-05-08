@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/morty-faas/morty/controller/orchestration"
@@ -53,10 +54,19 @@ func (a *adapter) GetFunctions(ctx context.Context) ([]*types.Function, error) {
 		workload := meta.GetValue()
 		// Filter on function elements only
 		if workload.GetKind() == rik.KIND_FUNCTION {
+			name, version := workload.GetName(), types.DefaultFunctionVersion
+
+			// Try to split the workload name as we have defined that the name of a RIK workload is fnName:fnVersion
+			tokens := strings.Split(workload.GetName(), ":")
+			if len(tokens) == 2 {
+				name, version = tokens[0], tokens[1]
+			}
+
 			functions = append(functions, &types.Function{
-				Id:       meta.GetId(),
-				Name:     workload.GetName(),
-				ImageURL: *workload.GetSpec().Function.Execution.Rootfs,
+				Name:           name,
+				Version:        version,
+				ImageURL:       *workload.GetSpec().Function.Execution.Rootfs,
+				OrchestratorId: meta.GetId(),
 			})
 		}
 	}
@@ -71,7 +81,7 @@ func (a *adapter) CreateFunction(ctx context.Context, fn *types.Function) (*type
 		return nil, err
 	}
 
-	fn.Id = wk.CreateWorkloadResponse.GetId()
+	fn.OrchestratorId = wk.CreateWorkloadResponse.GetId()
 	return fn, nil
 }
 
@@ -79,7 +89,7 @@ func (a *adapter) GetFunctionInstance(ctx context.Context, fn *types.Function) (
 	// isColdStart used to control wether it is a cold start or not for the instance
 	isColdStart := false
 
-	instances, err := a.getWorkloadInstances(ctx, fn.Id)
+	instances, err := a.getWorkloadInstances(ctx, fn.OrchestratorId)
 	if err != nil {
 		return nil, false, err
 	}
@@ -88,7 +98,7 @@ func (a *adapter) GetFunctionInstance(ctx context.Context, fn *types.Function) (
 		log.Debugf("Deploying new instance for function: %+v", fn)
 		isColdStart = true
 
-		if err := a.createWorkloadInstance(ctx, fn.Id, fn.Name); err != nil {
+		if err := a.createWorkloadInstance(ctx, fn.OrchestratorId, fn.Name); err != nil {
 			err := fmt.Errorf("Failed to create instance: %v", err)
 			log.Error(err)
 			return nil, false, err
@@ -96,7 +106,7 @@ func (a *adapter) GetFunctionInstance(ctx context.Context, fn *types.Function) (
 
 		time.Sleep(500 * time.Millisecond)
 
-		instances, err = a.getWorkloadInstances(ctx, fn.Id)
+		instances, err = a.getWorkloadInstances(ctx, fn.OrchestratorId)
 		if err != nil {
 			return nil, false, err
 		}

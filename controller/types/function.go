@@ -2,11 +2,21 @@ package types
 
 import "net/url"
 
+const DefaultFunctionVersion = "v0.1.0"
+
 type Function struct {
-	Id string `json:"id" redis:"id"`
-	// We don't want to serialize the name as a Redis HSET as we use the ID as the key
+	// We don't want to serialize the name and the version as a Redis HSET as we use the ID as the key
 	Name     string `json:"name" redis:"-"`
+	Version  string `json:"version" redis:"-"`
 	ImageURL string `json:"image" redis:"imageUrl"`
+	// The identifier of the workload on the underlying orchestrator
+	OrchestratorId string `json:"-" redis:"orchestratorId"`
+}
+
+// Id returns the computed identifier of the function in the following format:
+// functionName:functionVersion.
+func (f *Function) Id() string {
+	return f.Name + ":" + f.Version
 }
 
 type FnInstance struct {
