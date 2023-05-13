@@ -17,8 +17,15 @@ export AWS_ACCESS_KEY_ID=mortymorty
 export AWS_SECRET_ACCESS_KEY=mortymorty
 ```
 
+If you have a remote S3 Storage, specify the host with:
+    
+```bash
+export AWS_ENDPOINT_URL=http://custom-s3.storage.com:9000
+```
+
 Run the project : 
 
 ```bash
-make start
+make build/registry
+./morty-registry
 ```
