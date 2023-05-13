@@ -14,7 +14,7 @@ require (
 	github.com/otiai10/copy v1.11.0
 	github.com/prometheus/client_golang v1.15.0
 	github.com/redis/go-redis/v9 v9.0.3
-	github.com/rik-org/rik-go-client v0.1.4
+	github.com/rik-org/rik-go-client v0.1.5
 	github.com/sirupsen/logrus v1.9.0
 	github.com/thomasgouveia/go-config v1.0.0
 	golang.org/x/mod v0.10.0

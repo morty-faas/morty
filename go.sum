@@ -526,8 +526,8 @@ github.com/prometheus/procfs v0.9.0 h1:wzCHvIvM5SxWqYvwgVL7yJY8Lz3PKn49KQtpgMYJf
 github.com/prometheus/procfs v0.9.0/go.mod h1:+pB4zwohETzFnmlpe6yd2lSc+0/46IYZRB/chUwxUZY=
 github.com/redis/go-redis/v9 v9.0.3 h1:+7mmR26M0IvyLxGZUHxu4GiBkJkVDid0Un+j4ScYu4k=
 github.com/redis/go-redis/v9 v9.0.3/go.mod h1:WqMKv5vnQbRuZstUwxQI195wHy+t4PuXDOjzMvcuQHk=
-github.com/rik-org/rik-go-client v0.1.4 h1:DieQNgnbWVKkc8C6IkO6T/bZG+Zm2XOiXqCTqLpJx3w=
-github.com/rik-org/rik-go-client v0.1.4/go.mod h1:7EhBAgTNZ72AlNfKR4E+AzWtVP6uzRyoz1+aE09Z6aM=
+github.com/rik-org/rik-go-client v0.1.5 h1:rZ6wl9IQ7/PCZuvfXbFDCRQp5Fy6eRHoW2/rTqQIItI=
+github.com/rik-org/rik-go-client v0.1.5/go.mod h1:7EhBAgTNZ72AlNfKR4E+AzWtVP6uzRyoz1+aE09Z6aM=
 github.com/rogpeppe/fastuuid v1.2.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6LYCDYWNEvQ=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/rogpeppe/go-internal v1.10.0 h1:TMyTOH3F/DB16zRVcYyreMH6GnZZrwQVAoYjRBZyWFQ=
