@@ -107,6 +107,7 @@ func (s *server) makeRouter() http.Handler {
 
 	// Health
 	r.GET("/_/health", handlers.HealthHandler(s.state))
+	r.GET("/.well-known/morty.json", handlers.WellknownHandler())
 
 	// Functions
 	r.GET("/functions", handlers.ListFunctionsHandler(s.state, s.orch))
