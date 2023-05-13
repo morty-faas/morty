@@ -3,14 +3,17 @@
 .travis.yml
 README.md
 api/openapi.yaml
+api_configuration.go
 api_function.go
 client.go
 configuration.go
+docs/ConfigurationApi.md
 docs/CreateFunctionRequest.md
 docs/Error.md
 docs/Function.md
 docs/FunctionApi.md
 docs/GetFunctionResponseInner.md
+docs/ServerMetadata.md
 git_push.sh
 go.mod
 go.sum
@@ -18,6 +21,8 @@ model_create_function_request.go
 model_error.go
 model_function.go
 model_get_function_response_inner.go
+model_server_metadata.go
 response.go
+test/api_configuration_test.go
 test/api_function_test.go
 utils.go

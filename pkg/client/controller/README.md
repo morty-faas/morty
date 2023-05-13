@@ -78,6 +78,7 @@ All URIs are relative to *http://localhost*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
+*ConfigurationApi* | [**GetServerMetadata**](docs/ConfigurationApi.md#getservermetadata) | **Get** /.well-known/morty.json | Get informations about the server such as version, build commit etc.
 *FunctionApi* | [**CreateFunction**](docs/FunctionApi.md#createfunction) | **Post** /functions | Create a new function
 *FunctionApi* | [**GetFunctions**](docs/FunctionApi.md#getfunctions) | **Get** /functions | Get a list of the available functions
 
@@ -88,6 +89,7 @@ Class | Method | HTTP request | Description
  - [Error](docs/Error.md)
  - [Function](docs/Function.md)
  - [GetFunctionResponseInner](docs/GetFunctionResponseInner.md)
+ - [ServerMetadata](docs/ServerMetadata.md)
 
 
 ## Documentation For Authorization
