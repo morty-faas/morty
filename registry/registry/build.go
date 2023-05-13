@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/morty-faas/morty/controller/telemetry"
 	"github.com/morty-faas/morty/registry/builder"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/mod/semver"
@@ -78,6 +79,8 @@ func (s *Server) BuildHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Infof("build/%s: function build successful", opts.Id)
+
+	telemetry.FunctionBuildCounter.WithLabelValues(opts.Id, opts.Runtime).Inc()
 
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte("/v1/functions/" + functionName + "/" + functionVersion))

@@ -21,6 +21,13 @@ var (
 			Help:      "The invocation duration in seconds for a given function",
 			Buckets:   []float64{0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2},
 		}, labels)
+
+	FunctionBuildCounter = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: "morty",
+			Name:      "function_build_count",
+			Help:      "The total number of builds",
+		}, []string{"build_id", "runtime"})
 )
 
 // init() will get called on main() function initialization, so
@@ -29,4 +36,5 @@ var (
 func init() {
 	prometheus.MustRegister(FunctionInvocationCounter)
 	prometheus.MustRegister(FunctionInvocationDurationHistogram)
+	prometheus.MustRegister(FunctionBuildCounter)
 }
