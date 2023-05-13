@@ -7,6 +7,21 @@ info:
 servers:
 - url: /
 paths:
+  /.well-known/morty.json:
+    get:
+      description: "Get informations about the server such as version, build commit\
+        \ etc."
+      operationId: GetServerMetadata
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerMetadata'
+          description: The server metadata
+      summary: "Get informations about the server such as version, build commit etc."
+      tags:
+      - Configuration
   /functions:
     get:
       description: Get a list of the available functions
@@ -114,6 +129,20 @@ components:
       required:
       - image
       - name
+      type: object
+    ServerMetadata:
+      example:
+        gitCommit: 8354a6cce7a9a5747323054ece56bc88673ca714
+        version: v1.0.0
+      properties:
+        version:
+          description: The version of the Morty server
+          example: v1.0.0
+          type: string
+        gitCommit:
+          description: The Git commit the server was built on.
+          example: 8354a6cce7a9a5747323054ece56bc88673ca714
+          type: string
       type: object
     Error:
       properties:
