@@ -5,6 +5,20 @@ info:
     This document contains the specification of the public-facing Morty APIs. For function invocation, please see the project README here: https://github.com/morty-faas/morty/controller#readme
   version: 1.1.0
 paths:
+  /.well-known/morty.json:
+    get:
+      tags: [Configuration]
+      operationId: GetServerMetadata
+      summary: Get informations about the server such as version, build commit etc.
+      description: Get informations about the server such as version, build commit etc.
+      responses:
+        200:
+          description: The server metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerMetadata"
+
   /functions:
     get:
       tags: [Function]
@@ -114,6 +128,18 @@ components:
           type: string
         image:
           description: The URL of the function image
+          type: string
+
+    ServerMetadata:
+      type: object
+      properties:
+        version:
+          example: v1.0.0
+          description: The version of the Morty server
+          type: string
+        gitCommit:
+          example: 8354a6cce7a9a5747323054ece56bc88673ca714
+          description: The Git commit the server was built on.
           type: string
 
     Error:
