@@ -25,7 +25,8 @@ var (
 
 func InvokeFunctionHandler(s state.State, orch orchestration.Orchestrator) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		start := time.Now()
+		// Start the analytics
+		analytics := NewInvokeAnalytics()
 		ctx, fnName, fnVersion := c.Request.Context(), c.Param("name"), c.Param("version")
 
 		log.Debugf("Invoke version '%s' of function '%s'", fnVersion, fnName)
@@ -71,6 +72,7 @@ func InvokeFunctionHandler(s state.State, orch orchestration.Orchestrator) gin.H
 			log.Infof("Function '%s' is healthy and ready to receive requests", fnName)
 			break
 		}
+		analytics.UpsertOrchestrate()
 
 		// Each invocation warn up function for 15 minutes
 		if err := s.SetWithExpiry(ctx, instance.Id, 15*time.Minute); err != nil {
@@ -85,7 +87,7 @@ func InvokeFunctionHandler(s state.State, orch orchestration.Orchestrator) gin.H
 
 		proxy.ModifyResponse = func(r *http.Response) error {
 			// Record the execution time of the invocation
-			elapsed := time.Since(start).Seconds()
+			elapsed := float64(analytics.UpsertInvoke()) / 1000
 			log.Debugf("Function '%s' was invoked in %vs (is cold start: %v)", fnName, elapsed, isColdStart)
 			telemetry.FunctionInvocationDurationHistogram.WithLabelValues(labels...).Observe(elapsed)
 
@@ -118,6 +120,10 @@ func InvokeFunctionHandler(s state.State, orch orchestration.Orchestrator) gin.H
 			r.Body = io.NopCloser(bytes.NewReader(responseBytes))
 			r.ContentLength = int64(contentLength)
 			r.Header.Set("Content-Length", strconv.Itoa(contentLength))
+
+			r.Header.Set(string(HttpHeaderFunctionResponseTime), strconv.FormatInt(analytics.UpsertInvoke(), 10))
+			r.Header.Set(string(HttpHeaderOrchestrateResponseTime), strconv.FormatInt(analytics.UpsertOrchestrate(), 10))
+			r.Header.Set(string(HttpHeaderMortyResponseTime), strconv.FormatInt(analytics.UpsertTotal(), 10))
 
 			return nil
 		}
