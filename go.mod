@@ -12,7 +12,7 @@ require (
 	github.com/hashicorp/go-getter v1.7.1
 	github.com/morty-faas/registry v1.1.0
 	github.com/otiai10/copy v1.11.0
-	github.com/prometheus/client_golang v1.15.0
+	github.com/prometheus/client_golang v1.15.1
 	github.com/redis/go-redis/v9 v9.0.3
 	github.com/rik-org/rik-go-client v0.1.5
 	github.com/sirupsen/logrus v1.9.0
