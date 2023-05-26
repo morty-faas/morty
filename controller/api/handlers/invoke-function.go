@@ -60,7 +60,7 @@ func InvokeFunctionHandler(s state.State, orch orchestration.Orchestrator) gin.H
 		healthcheck := instance.Endpoint.String() + "/_/health"
 		for i := 0; i < maxHealthcheckRetries; i++ {
 			log.Debugf("Performing healthcheck request on Alpha: %s", healthcheck)
-			if _, err := http.Get(healthcheck); err != nil {
+			if res, err := http.Get(healthcheck); err != nil || res.StatusCode != http.StatusOK {
 				if i == maxHealthcheckRetries-1 {
 					log.Errorf("failed to perform healthcheck on Alpha: %v", err)
 					c.JSON(http.StatusServiceUnavailable, makeApiError(ErrFunctionCantBeMarkedAsHealthy))
