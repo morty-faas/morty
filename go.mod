@@ -13,7 +13,7 @@ require (
 	github.com/morty-faas/registry v1.1.0
 	github.com/otiai10/copy v1.11.0
 	github.com/prometheus/client_golang v1.15.1
-	github.com/redis/go-redis/v9 v9.0.4
+	github.com/redis/go-redis/v9 v9.0.5
 	github.com/rik-org/rik-go-client v0.1.5
 	github.com/sirupsen/logrus v1.9.2
 	github.com/thomasgouveia/go-config v1.0.0
