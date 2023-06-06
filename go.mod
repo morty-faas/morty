@@ -15,7 +15,7 @@ require (
 	github.com/prometheus/client_golang v1.15.1
 	github.com/redis/go-redis/v9 v9.0.4
 	github.com/rik-org/rik-go-client v0.1.5
-	github.com/sirupsen/logrus v1.9.2
+	github.com/sirupsen/logrus v1.9.3
 	github.com/thomasgouveia/go-config v1.0.0
 	golang.org/x/mod v0.10.0
 )
